@@ -2,6 +2,8 @@ console.log("Renderer script loaded")
 
 const webview = document.getElementById("baseWeb")
 
+let intervalStarted = false  // prevent multiple intervals
+
 function wait(ms){
   return new Promise(resolve => setTimeout(resolve, ms))
 }
@@ -28,6 +30,7 @@ async function waitForColumn(){
 
 async function extractTasks(){
 
+  console.log("Running at:", new Date().toLocaleTimeString())
   console.log("Starting extraction...")
 
   const results = await webview.executeJavaScript(`
@@ -82,11 +85,19 @@ webview.addEventListener("did-finish-load", async () => {
 
   extractTasks()
 
-  setInterval(() => {
+  // prevent multiple intervals from being created
+  if(!intervalStarted){
 
-    console.log("Running scheduled extraction...")
-    extractTasks()
+    intervalStarted = true
 
-  }, 600000)
+    setInterval(() => {
+
+      console.log("Running at:", new Date().toLocaleTimeString())
+      console.log("Running scheduled extraction...")
+      extractTasks()
+
+    }, 600000) // 10 minutes
+
+  }
 
 })
